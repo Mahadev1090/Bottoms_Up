@@ -1,6 +1,6 @@
 package com.ins.web.vo;
 
-public class MasterUserVoRequest {
+public class MasterUserRequest {
 
 	private String name;
 

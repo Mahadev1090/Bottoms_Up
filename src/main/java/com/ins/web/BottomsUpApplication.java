@@ -19,8 +19,7 @@ public class BottomsUpApplication implements CommandLineRunner{
     public void run(String... args) throws Exception {
         System.out.println("Starting code");
         
-//        MasterUserVo user = new MasterUserVo();
-//        
+//        MasterUserVo user = new MasterUserVo();        
 //        user.setName("Dinesh");
 //        user.setCompany("Aseuro");
 //        user.setLocation("Bangalore");
