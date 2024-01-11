@@ -5,25 +5,33 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ins.web.dto.MasterUserWithMasterProjectDTO;
 import com.ins.web.service.MasterUserService;
 import com.ins.web.service.exception.NoMatchingDataException;
+import com.ins.web.vo.MasterUserRequest;
 import com.ins.web.vo.MasterUserVo;
 import com.ins.web.vo.SearchRequest;
 
 @RestController
 @RequestMapping("/api/masterUsers")
-public class MasterUsersController {
+public class MasterUserController {
 
     @Autowired
     private MasterUserService masterUserService;
 
+    @GetMapping
+	public List<MasterUserVo> getAllMasterUsers() {
+		return masterUserService.getAllMasterUsers();
+	}
+    
     @PostMapping("/adduser")
-    public ResponseEntity<MasterUserVo> createUser(@RequestBody MasterUserVo user) {
+    public ResponseEntity<MasterUserVo> createUser(@RequestBody MasterUserRequest user) {
         MasterUserVo savedUser = masterUserService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
@@ -33,7 +41,7 @@ public class MasterUsersController {
 
 		try {
 			
-			List<MasterUserVo> result = masterUserService.searchData(searchRequest);
+			List<MasterUserWithMasterProjectDTO> result = masterUserService.searchData(searchRequest);
 
 			if (result.isEmpty()) {
 				String message = "No matching data found for the provided criteria.";

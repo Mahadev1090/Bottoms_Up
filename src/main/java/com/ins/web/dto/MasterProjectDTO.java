@@ -1,6 +1,9 @@
-package com.ins.web.vo;
+package com.ins.web.dto;
 
-public class MasterProjectVoRequest {
+public class MasterProjectDTO {
+	
+	private Long id;
+	
 	private String status;
 
 	private Long projectKey;
@@ -30,6 +33,14 @@ public class MasterProjectVoRequest {
 	private String updatedOn;
 
 	private String updatedBy;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public String getStatus() {
 		return status;
@@ -150,5 +161,6 @@ public class MasterProjectVoRequest {
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
 	}
+	
 	
 }

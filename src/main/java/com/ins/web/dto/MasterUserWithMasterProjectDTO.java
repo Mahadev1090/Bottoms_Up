@@ -1,22 +1,9 @@
-package com.ins.web.vo;
+package com.ins.web.dto;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name="users")
-public class MasterUserVo {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
-
+public class MasterUserWithMasterProjectDTO {
+	
+	private Long id;
+	
 	private String name;
 
 	private String company;
@@ -45,22 +32,15 @@ public class MasterUserVo {
 
 	private String updatedBy;
 	
-	
-	@ManyToOne
-    @JoinColumn(name = "project_id")
-    @JsonBackReference
-    private MasterProjectVo masterProject;
-	public MasterUserVo() {
-		super();
-	}
+	private MasterProjectDTO project;
 	
 	
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -176,41 +156,13 @@ public class MasterUserVo {
 		this.updatedBy = updatedBy;
 	}
 
-	public MasterUserVo(long id, String name, String company, String status, String type, String manager, double rates,
-			String startDate, String endDate, String title, String location, String createdOn, String createdBy,
-			String updatedOn, String updatedBy, MasterProjectVo masterProject) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.company = company;
-		this.status = status;
-		this.type = type;
-		this.manager = manager;
-		this.rates = rates;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.title = title;
-		this.location = location;
-		this.createdOn = createdOn;
-		this.createdBy = createdBy;
-		this.updatedOn = updatedOn;
-		this.updatedBy = updatedBy;
-		this.masterProject = masterProject;
+	public MasterProjectDTO getProject() {
+		return project;
 	}
 
-
-
-	public MasterProjectVo getMasterProject() {
-		return masterProject;
-	}
-
-
-
-	public void setMasterProject(MasterProjectVo masterProject) {
-		this.masterProject = masterProject;
+	public void setProject(MasterProjectDTO project) {
+		this.project = project;
 	}
 	
-	
-
 	
 }
