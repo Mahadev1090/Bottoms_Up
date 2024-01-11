@@ -1,10 +1,14 @@
 package com.ins.web.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 //import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +58,7 @@ public class MasterUserServiceImpl implements MasterUserService {
 		if (searchRequest.getId() != null) {
 			predicates.add(criteriaBuilder.equal(root.get("id"), searchRequest.getId()));
 		}
-		
+
 		if (!StringUtils.isEmpty(searchRequest.getName())) {
 			predicates.add(criteriaBuilder.equal(root.get("name"), searchRequest.getName()));
 		}
@@ -74,10 +78,11 @@ public class MasterUserServiceImpl implements MasterUserService {
 		if (!StringUtils.isEmpty(searchRequest.getLocation())) {
 			predicates.add(criteriaBuilder.equal(root.get("location"), searchRequest.getLocation()));
 		}
-		
-		//MasterProject search
+
+		// MasterProject search
 		if (searchRequest.getProjectKey() != null) {
-			predicates.add(criteriaBuilder.equal(root.get("masterProject").get("projectKey"), searchRequest.getProjectKey()));
+			predicates.add(
+					criteriaBuilder.equal(root.get("masterProject").get("projectKey"), searchRequest.getProjectKey()));
 		}
 
 		if (!StringUtils.isEmpty(searchRequest.getProjectName())) {
@@ -104,8 +109,6 @@ public class MasterUserServiceImpl implements MasterUserService {
 			predicates.add(criteriaBuilder.equal(root.get("masterProject").get("accountType"),
 					searchRequest.getAccountType()));
 		}
-		
-		
 
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 
@@ -188,36 +191,79 @@ public class MasterUserServiceImpl implements MasterUserService {
 	// Add Master User
 	@Override
 	@Transactional
-	public MasterUserVo createUser(MasterUserRequest masterUserRequest) {
+	public ResponseEntity<Map<String, String>> createUser(MasterUserRequest masterUserRequest){
 
-		MasterProjectVo project = masterProjectDao.findById(masterUserRequest.getProjectId())
-				.orElseThrow(() -> new IllegalArgumentException(
-						"Department not found with ID: " + masterUserRequest.getProjectId()));
+		try {
+			// Validate masterUserRequest and other input parameters
+			validateMasterUserRequest(masterUserRequest);
 
-		// creating a new employee
-		MasterUserVo newUser = new MasterUserVo();
-		newUser.setName(masterUserRequest.getName());
-		newUser.setCompany(masterUserRequest.getCompany());
-		newUser.setStatus(masterUserRequest.getStatus());
-		newUser.setType(masterUserRequest.getType());
-		newUser.setManager(masterUserRequest.getManager());
-		newUser.setRates(masterUserRequest.getRates());
-		newUser.setStartDate(masterUserRequest.getStartDate());
-		newUser.setEndDate(masterUserRequest.getEndDate());
-		newUser.setTitle(masterUserRequest.getTitle());
-		newUser.setLocation(masterUserRequest.getLocation());
-		newUser.setCreatedOn(masterUserRequest.getCreatedOn());
-		newUser.setCreatedBy(masterUserRequest.getCreatedBy());
-		newUser.setUpdatedBy(masterUserRequest.getUpdatedBy());
-		newUser.setUpdatedOn(masterUserRequest.getUpdatedOn());
+			// Check if the specified project exists
+			Long projectId = masterUserRequest.getProjectId();
+			MasterProjectVo project = masterProjectDao.findById(projectId)
+					.orElseThrow(() -> new IllegalArgumentException("Project not found with ID: " + projectId));
 
-		newUser.setMasterProject(project);
+			// Creating a new user
+			MasterUserVo newUser = new MasterUserVo();
+			newUser.setName(masterUserRequest.getName());
+			newUser.setCompany(masterUserRequest.getCompany());
+			newUser.setStatus(masterUserRequest.getStatus());
+			newUser.setType(masterUserRequest.getType());
+			newUser.setManager(masterUserRequest.getManager());
+			newUser.setRates(masterUserRequest.getRates());
+			newUser.setStartDate(masterUserRequest.getStartDate());
+			newUser.setEndDate(masterUserRequest.getEndDate());
+			newUser.setTitle(masterUserRequest.getTitle());
+			newUser.setLocation(masterUserRequest.getLocation());
+			newUser.setCreatedOn(masterUserRequest.getCreatedOn());
+			newUser.setCreatedBy(masterUserRequest.getCreatedBy());
+			newUser.setUpdatedBy(masterUserRequest.getUpdatedBy());
+			newUser.setUpdatedOn(masterUserRequest.getUpdatedOn());
 
-		// saving the employee to db
-		return masterUserDao.save(newUser);
+			newUser.setMasterProject(project);
+
+			// Saving the user to the database
+            masterUserDao.save(newUser);
+
+            // Return success response
+            return new ResponseEntity<>(Collections.singletonMap("message", "User created successfully"), HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            // Handle specific validation errors
+            String errorMessage = "Validation error: " + e.getMessage();
+            return new ResponseEntity<>(Collections.singletonMap("error", errorMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            // Handle other unexpected errors
+            String errorMessage = "An unexpected error occurred: " + e.getMessage();
+            return new ResponseEntity<>(Collections.singletonMap("error", errorMessage), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 	}
 
-	
+	private void validateMasterUserRequest(MasterUserRequest masterUserRequest) throws IllegalArgumentException {
+		if (masterUserRequest == null) {
+			throw new IllegalArgumentException("MasterUserRequest cannot be null");
+		}
+
+		// Validating required fields
+		if (StringUtils.isEmpty(masterUserRequest.getName()) || StringUtils.isEmpty(masterUserRequest.getCompany())
+				|| StringUtils.isEmpty(masterUserRequest.getStatus())
+				|| StringUtils.isEmpty(masterUserRequest.getLocation())
+				|| StringUtils.isEmpty(masterUserRequest.getCreatedBy())
+				|| StringUtils.isEmpty(masterUserRequest.getCreatedOn())
+				|| StringUtils.isEmpty(masterUserRequest.getUpdatedBy())
+				|| StringUtils.isEmpty(masterUserRequest.getUpdatedOn())
+				|| StringUtils.isEmpty(masterUserRequest.getTitle())
+				|| StringUtils.isEmpty(masterUserRequest.getStartDate())
+				|| StringUtils.isEmpty(masterUserRequest.getEndDate())
+				|| StringUtils.isEmpty(masterUserRequest.getType())) {
+			throw new IllegalArgumentException(
+					"Required fields (name, company, status, type, Location, createdBy, createdOn, upadatedOn, updatedBy, title, startDate, EndDate) cannot be empty");
+		}
+
+//		 Check if the specified project ID is present
+        if (masterUserRequest.getProjectId() == null) {
+            throw new IllegalArgumentException("Project ID cannot be null");
+        }
+	}
+
 	@Override
 	public List<MasterUserVo> getAllMasterUsers() {
 		return masterUserDao.findAll();

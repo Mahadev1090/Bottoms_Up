@@ -1,11 +1,16 @@
 package com.ins.web.service;
 
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
 
 import com.ins.web.dto.MasterUserWithMasterProjectDTO;
 import com.ins.web.vo.MasterUserRequest;
 import com.ins.web.vo.MasterUserVo;
 import com.ins.web.vo.SearchRequest;
+
+import jakarta.validation.Valid;
 
 public interface MasterUserService {
 	//addUser
@@ -15,7 +20,7 @@ public interface MasterUserService {
 	List<MasterUserWithMasterProjectDTO> searchData(SearchRequest searchRequest);
 
 //	MasterUserVo createUser(MasterUserVo user);
-	MasterUserVo createUser(MasterUserRequest masterUserRequest);
+	ResponseEntity<Map<String, String>> createUser(@Valid MasterUserRequest masterUserRequest);
 
 	List<MasterUserVo> getAllMasterUsers();
 }
