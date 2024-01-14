@@ -23,4 +23,8 @@ public interface MasterUserService {
 	ResponseEntity<Map<String, String>> createUser(@Valid MasterUserRequest masterUserRequest);
 
 	List<MasterUserVo> getAllMasterUsers();
+	
+	public MasterUserVo getUserById(long userId);
+	
+	public void updateUser(MasterUserVo user);
 }
