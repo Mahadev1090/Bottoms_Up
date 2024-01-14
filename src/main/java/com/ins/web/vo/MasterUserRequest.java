@@ -1,6 +1,11 @@
 package com.ins.web.vo;
 
 public class MasterUserRequest {
+	private Long id;
+	
+	public Long getId() {
+		return id;
+	}
 
 	private String name;
 
@@ -84,9 +89,6 @@ public class MasterUserRequest {
 		return startDate;
 	}
 
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
 
 	public String getEndDate() {
 		return endDate;
@@ -116,17 +118,12 @@ public class MasterUserRequest {
 		return createdOn;
 	}
 
-	public void setCreatedOn(String createdOn) {
-		this.createdOn = createdOn;
-	}
+	
 
 	public String getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
 
 	public String getUpdatedOn() {
 		return updatedOn;

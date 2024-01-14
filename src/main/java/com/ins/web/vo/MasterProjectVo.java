@@ -38,7 +38,7 @@ public class MasterProjectVo {public MasterProjectVo() {
 
 	private String endDate;
 
-	private String projectManger;
+	private String projectManager;
 
 	private String createdBy;
 
@@ -61,6 +61,10 @@ public class MasterProjectVo {public MasterProjectVo() {
 
 	public String getStatus() {
 		return status;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
 	}
 
 	public void setStatus(String status) {
@@ -139,17 +143,6 @@ public class MasterProjectVo {public MasterProjectVo() {
 		this.endDate = endDate;
 	}
 
-	public String getProjectManger() {
-		return projectManger;
-	}
-
-	public void setProjectManger(String projectManger) {
-		this.projectManger = projectManger;
-	}
-
-	public String getCreatedBy() {
-		return createdBy;
-	}
 
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
@@ -189,7 +182,7 @@ public class MasterProjectVo {public MasterProjectVo() {
 
 	public MasterProjectVo(Long id, String status, Long projectKey, String projectName, String projectDescription,
 			String accountType, String projectAFENum, String projectApprovedCapex, String projectApprovedOpex,
-			String startDate, String endDate, String projectManger, String createdBy, String createdOn,
+			String startDate, String endDate, String projectManager, String createdBy, String createdOn,
 			String updatedOn, String updatedBy, List<MasterUserVo> masterUsers) {
 		super();
 		this.id = id;
@@ -203,12 +196,20 @@ public class MasterProjectVo {public MasterProjectVo() {
 		this.projectApprovedOpex = projectApprovedOpex;
 		this.startDate = startDate;
 		this.endDate = endDate;
-		this.projectManger = projectManger;
+		this.projectManager = projectManager;
 		this.createdBy = createdBy;
 		this.createdOn = createdOn;
 		this.updatedOn = updatedOn;
 		this.updatedBy = updatedBy;
 		this.masterUsers = masterUsers;
+	}
+
+	public String getProjectManager() {
+		return projectManager;
+	}
+
+	public void setProjectManager(String projectManager) {
+		this.projectManager = projectManager;
 	}
 	
 	

@@ -50,7 +50,7 @@ public class MasterProjectServiceImpl implements MasterProjectService {
 			newProject.setProjectApprovedOpex(masterProjectRequest.getProjectApprovedOpex());
 			newProject.setStartDate(masterProjectRequest.getStartDate());
 			newProject.setEndDate(masterProjectRequest.getEndDate());
-			newProject.setProjectManger(masterProjectRequest.getProjectManger());
+			newProject.setProjectManager(masterProjectRequest.getProjectManager());
 			newProject.setCreatedBy(masterProjectRequest.getCreatedBy());
 			newProject.setCreatedOn(masterProjectRequest.getCreatedOn());
 			newProject.setUpdatedBy(masterProjectRequest.getUpdatedBy());
@@ -79,7 +79,7 @@ public class MasterProjectServiceImpl implements MasterProjectService {
 		// Validating required fields
 		if (StringUtils.isEmpty(masterProjectRequest.getProjectName())
 				|| StringUtils.isEmpty(masterProjectRequest.getAccountType())
-				|| StringUtils.isEmpty(masterProjectRequest.getProjectManger())
+				|| StringUtils.isEmpty(masterProjectRequest.getProjectManager())
 				|| StringUtils.isEmpty(masterProjectRequest.getCreatedBy())
 				|| StringUtils.isEmpty(masterProjectRequest.getCreatedOn())
 				|| StringUtils.isEmpty(masterProjectRequest.getUpdatedBy())
@@ -88,7 +88,6 @@ public class MasterProjectServiceImpl implements MasterProjectService {
 				|| StringUtils.isEmpty(masterProjectRequest.getProjectApprovedCapex())
 				|| StringUtils.isEmpty(masterProjectRequest.getProjectApprovedOpex())
 				|| StringUtils.isEmpty(masterProjectRequest.getStartDate())
-				|| StringUtils.isEmpty(masterProjectRequest.getProjectManger())
 				|| StringUtils.isEmpty(masterProjectRequest.getEndDate())
 				|| StringUtils.isEmpty(masterProjectRequest.getUpdatedOn())) {
 			throw new ValidationException(
@@ -108,4 +107,13 @@ public class MasterProjectServiceImpl implements MasterProjectService {
 	public List<MasterProjectVo> getAllMasterProjects() {
 		return masterProjectDao.findAll();
 	}
+	
+
+	public MasterProjectVo getUserById(long projectId) {
+        return masterProjectDao.findById(projectId).orElse(null);
+    }
+	
+	public void updateProject(MasterProjectVo user) {
+		masterProjectDao.save(user);
+    }
 }

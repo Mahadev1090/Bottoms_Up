@@ -21,7 +21,7 @@ public class MasterProjectRequest {
 
 	private String endDate;
 
-	private String projectManger;
+	private String projectManager;
 
 	private String createdBy;
 
@@ -111,12 +111,12 @@ public class MasterProjectRequest {
 		this.endDate = endDate;
 	}
 
-	public String getProjectManger() {
-		return projectManger;
+	public String getProjectManager() {
+		return projectManager;
 	}
 
-	public void setProjectManger(String projectManger) {
-		this.projectManger = projectManger;
+	public void setProjectManager(String projectManger) {
+		this.projectManager = projectManger;
 	}
 
 	public String getCreatedBy() {

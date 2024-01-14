@@ -173,7 +173,7 @@ public class MasterUserServiceImpl implements MasterUserService {
 				masterProjectDTO.setProjectApprovedOpex(masterProject.getProjectApprovedOpex());
 				masterProjectDTO.setStartDate(masterProject.getStartDate());
 				masterProjectDTO.setEndDate(masterProject.getEndDate());
-				masterProjectDTO.setProjectManger(masterProject.getProjectManger());
+				masterProjectDTO.setProjectManager(masterProject.getProjectManager());
 				masterProjectDTO.setCreatedBy(masterProject.getCreatedBy());
 				masterProjectDTO.setCreatedOn(masterProject.getCreatedOn());
 				masterProjectDTO.setUpdatedBy(masterProject.getUpdatedBy());
@@ -264,8 +264,19 @@ public class MasterUserServiceImpl implements MasterUserService {
         }
 	}
 
+	
+	// Update MasterUser
 	@Override
 	public List<MasterUserVo> getAllMasterUsers() {
 		return masterUserDao.findAll();
 	}
+	
+	
+	public MasterUserVo getUserById(long userId) {
+        return masterUserDao.findById(userId).orElse(null);
+    }
+
+    public void updateUser(MasterUserVo user) {
+    	masterUserDao.save(user);
+    }
 }
