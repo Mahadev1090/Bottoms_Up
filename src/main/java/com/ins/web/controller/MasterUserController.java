@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,12 +32,14 @@ public class MasterUserController {
     @Autowired
     private MasterUserService masterUserService;
 
-    @GetMapping
+    @GetMapping("/getAllUsers")
+    @PreAuthorize("hasAuthority('USER_ROLES')")
 	public List<MasterUserVo> getAllMasterUsers() {
 		return masterUserService.getAllMasterUsers();
 	}
     
     @PostMapping("/adduser")
+    @PreAuthorize("hasAuthority('ADMIN_ROLES')")
     public ResponseEntity<Object> createUser(@RequestBody @Valid MasterUserRequest user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             // Build a custom error message or response
@@ -57,6 +60,7 @@ public class MasterUserController {
     }
     
     @PostMapping("/search")
+    @PreAuthorize("hasAuthority('ADMIN_ROLES')")
 	public ResponseEntity<Object> searchData ( @RequestBody SearchRequest searchRequest) {
 
 		try {
@@ -82,6 +86,7 @@ public class MasterUserController {
     
     
     @PutMapping("/update")
+    @PreAuthorize("hasAuthority('ADMIN_ROLES')")
     public ResponseEntity<Object> updateUser(@RequestBody MasterUserRequest user) {
     	
     	// Check if fields that should not be modified are present in the request

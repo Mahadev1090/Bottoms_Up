@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,12 +29,14 @@ public class MasterProjectController {
 	@Autowired
 	private MasterProjectService masterProjectService;
 
-	@GetMapping
+	@GetMapping("/getAllProjects")
+    @PreAuthorize("hasAuthority('USER_ROLES')")
 	public List<MasterProjectVo> getAllMasterProjects() {
 		return masterProjectService.getAllMasterProjects();
 	}
 
 	@PostMapping("/addProject")
+    @PreAuthorize("hasAuthority('ADMIN_ROLES')")
 	public ResponseEntity<Object> createProject(@RequestBody @Valid MasterProjectRequest masterProjectRequest,
 			BindingResult bindingResult) {
 
@@ -55,6 +58,7 @@ public class MasterProjectController {
 	}
 
 	@PutMapping("/update")
+    @PreAuthorize("hasAuthority('ADMIN_ROLES')")
 	public ResponseEntity<Object> updateProject(@RequestBody MasterProjectVo project) {
 
 		if (project.getStartDate() != null || project.getCreatedBy() != null || project.getCreatedOn() != null || project.getProjectKey() != null) {
@@ -87,6 +91,9 @@ public class MasterProjectController {
 			}
 			if (project.getProjectManager() != null) {
 				existingUser.setProjectManager(project.getProjectManager());
+			}
+			if (project.getProjectDescription() != null) {
+				existingUser.setProjectDescription(project.getProjectDescription());
 			}
 			if (project.getProjectApprovedCapex() != null) {
 				existingUser.setProjectApprovedCapex(project.getProjectApprovedCapex());
