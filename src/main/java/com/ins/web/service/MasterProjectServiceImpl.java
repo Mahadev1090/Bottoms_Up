@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.ins.web.dao.MasterProjectDao;
+import com.ins.web.security.date.AuthenticationService;
+import com.ins.web.security.date.DateTimeProvider;
 import com.ins.web.vo.MasterProjectRequest;
 import com.ins.web.vo.MasterProjectVo;
 
@@ -23,6 +25,12 @@ public class MasterProjectServiceImpl implements MasterProjectService {
 
 	@Autowired
 	private MasterProjectDao masterProjectDao;
+	
+	@Autowired
+    private AuthenticationService authenticationService; 
+
+    @Autowired
+    private DateTimeProvider dateTimeProvider;
 
 	public MasterProjectServiceImpl(MasterProjectDao masterProjectDao) {
 		this.masterProjectDao = masterProjectDao;
@@ -31,6 +39,10 @@ public class MasterProjectServiceImpl implements MasterProjectService {
 	@Transactional
 	@Override
 	public ResponseEntity<Map<String, String>> createProject(MasterProjectRequest masterProjectRequest) {
+		
+		String currentUser = authenticationService.getCurrentUsername();
+        String currentDateTime = dateTimeProvider.getCurrentDateTime();
+        
 		try {
 			// Validating masterProjectRequest and other input parameters
 			validateMasterProjectRequest(masterProjectRequest);
@@ -51,10 +63,10 @@ public class MasterProjectServiceImpl implements MasterProjectService {
 			newProject.setStartDate(masterProjectRequest.getStartDate());
 			newProject.setEndDate(masterProjectRequest.getEndDate());
 			newProject.setProjectManager(masterProjectRequest.getProjectManager());
-			newProject.setCreatedBy(masterProjectRequest.getCreatedBy());
-			newProject.setCreatedOn(masterProjectRequest.getCreatedOn());
-			newProject.setUpdatedBy(masterProjectRequest.getUpdatedBy());
-			newProject.setUpdatedOn(masterProjectRequest.getUpdatedOn());
+			newProject.setCreatedBy(currentUser);
+			newProject.setCreatedOn(currentDateTime);
+			newProject.setUpdatedBy(currentUser);
+			newProject.setUpdatedOn(currentDateTime);
 
 			// save the department to db
 			masterProjectDao.save(newProject);
@@ -80,18 +92,13 @@ public class MasterProjectServiceImpl implements MasterProjectService {
 		if (StringUtils.isEmpty(masterProjectRequest.getProjectName())
 				|| StringUtils.isEmpty(masterProjectRequest.getAccountType())
 				|| StringUtils.isEmpty(masterProjectRequest.getProjectManager())
-				|| StringUtils.isEmpty(masterProjectRequest.getCreatedBy())
-				|| StringUtils.isEmpty(masterProjectRequest.getCreatedOn())
-				|| StringUtils.isEmpty(masterProjectRequest.getUpdatedBy())
 				|| StringUtils.isEmpty(masterProjectRequest.getStatus())
 				|| StringUtils.isEmpty(masterProjectRequest.getProjectDescription())
 				|| StringUtils.isEmpty(masterProjectRequest.getProjectApprovedCapex())
 				|| StringUtils.isEmpty(masterProjectRequest.getProjectApprovedOpex())
-				|| StringUtils.isEmpty(masterProjectRequest.getStartDate())
-				|| StringUtils.isEmpty(masterProjectRequest.getEndDate())
-				|| StringUtils.isEmpty(masterProjectRequest.getUpdatedOn())) {
+				|| StringUtils.isEmpty(masterProjectRequest.getStartDate())) {
 			throw new ValidationException(
-					"Required fields (projectName, accountType, projectManger, createdBy, createdOn, updatedBy, updatedOn, status, project Description, ProjectApprovedCapex, ProjectApprovedOpex, startDate, endDate, projectManager) cannot be empty");
+					"Required fields (projectName, accountType, projectManger, status, project Description, ProjectApprovedCapex, ProjectApprovedOpex, startDate, endDate, projectManager) cannot be empty");
 		}
 	}
 

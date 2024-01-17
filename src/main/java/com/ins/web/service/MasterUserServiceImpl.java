@@ -16,6 +16,8 @@ import com.ins.web.dao.MasterProjectDao;
 import com.ins.web.dao.MasterUserDao;
 import com.ins.web.dto.MasterProjectDTO;
 import com.ins.web.dto.MasterUserWithMasterProjectDTO;
+import com.ins.web.security.date.AuthenticationService;
+import com.ins.web.security.date.DateTimeProvider;
 //import com.ins.web.dao.MasterUserDao;
 import com.ins.web.service.exception.NoMatchingDataException;
 import com.ins.web.vo.MasterProjectVo;
@@ -45,6 +47,12 @@ public class MasterUserServiceImpl implements MasterUserService {
 
 	@PersistenceContext
 	private EntityManager entityManager;
+	
+	@Autowired
+    private AuthenticationService authenticationService; 
+
+    @Autowired
+    private DateTimeProvider dateTimeProvider;
 
 	// Master User Search with project details
 	@Override
@@ -193,6 +201,9 @@ public class MasterUserServiceImpl implements MasterUserService {
 	@Transactional
 	public ResponseEntity<Map<String, String>> createUser(MasterUserRequest masterUserRequest){
 
+		String currentUser = authenticationService.getCurrentUsername();
+        String currentDateTime = dateTimeProvider.getCurrentDateTime();
+        
 		try {
 			// Validate masterUserRequest and other input parameters
 			validateMasterUserRequest(masterUserRequest);
@@ -214,10 +225,10 @@ public class MasterUserServiceImpl implements MasterUserService {
 			newUser.setEndDate(masterUserRequest.getEndDate());
 			newUser.setTitle(masterUserRequest.getTitle());
 			newUser.setLocation(masterUserRequest.getLocation());
-			newUser.setCreatedOn(masterUserRequest.getCreatedOn());
-			newUser.setCreatedBy(masterUserRequest.getCreatedBy());
-			newUser.setUpdatedBy(masterUserRequest.getUpdatedBy());
-			newUser.setUpdatedOn(masterUserRequest.getUpdatedOn());
+			newUser.setCreatedOn(currentDateTime);
+			newUser.setCreatedBy(currentUser);
+			newUser.setUpdatedBy(currentUser);
+			newUser.setUpdatedOn(currentDateTime);
 
 			newUser.setMasterProject(project);
 
@@ -246,16 +257,11 @@ public class MasterUserServiceImpl implements MasterUserService {
 		if (StringUtils.isEmpty(masterUserRequest.getName()) || StringUtils.isEmpty(masterUserRequest.getCompany())
 				|| StringUtils.isEmpty(masterUserRequest.getStatus())
 				|| StringUtils.isEmpty(masterUserRequest.getLocation())
-				|| StringUtils.isEmpty(masterUserRequest.getCreatedBy())
-				|| StringUtils.isEmpty(masterUserRequest.getCreatedOn())
-				|| StringUtils.isEmpty(masterUserRequest.getUpdatedBy())
-				|| StringUtils.isEmpty(masterUserRequest.getUpdatedOn())
 				|| StringUtils.isEmpty(masterUserRequest.getTitle())
 				|| StringUtils.isEmpty(masterUserRequest.getStartDate())
-				|| StringUtils.isEmpty(masterUserRequest.getEndDate())
 				|| StringUtils.isEmpty(masterUserRequest.getType())) {
 			throw new IllegalArgumentException(
-					"Required fields (name, company, status, type, Location, createdBy, createdOn, upadatedOn, updatedBy, title, startDate, EndDate) cannot be empty");
+					"Required fields (name, company, status, type, Location, title, startDate) cannot be empty");
 		}
 
 //		 Check if the specified project ID is present

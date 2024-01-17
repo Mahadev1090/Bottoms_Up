@@ -3,8 +3,12 @@ package com.ins.web;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @SpringBootApplication
+@ComponentScan(basePackages = "com.ins.web")
+@EnableAspectJAutoProxy
 public class BottomsUpApplication implements CommandLineRunner{
 	
 //	@Autowired
