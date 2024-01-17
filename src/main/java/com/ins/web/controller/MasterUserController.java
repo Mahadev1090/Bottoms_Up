@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ins.web.dto.MasterUserWithMasterProjectDTO;
+import com.ins.web.security.date.AuthenticationService;
+import com.ins.web.security.date.DateTimeProvider;
 import com.ins.web.service.MasterUserService;
 import com.ins.web.service.exception.NoMatchingDataException;
 import com.ins.web.vo.MasterProjectVo;
@@ -31,6 +33,12 @@ public class MasterUserController {
 
     @Autowired
     private MasterUserService masterUserService;
+    
+    @Autowired
+    private AuthenticationService authenticationService; 
+
+    @Autowired
+    private DateTimeProvider dateTimeProvider; 
 
     @GetMapping("/getAllUsers")
     @PreAuthorize("hasAuthority('USER_ROLES')")
@@ -89,15 +97,19 @@ public class MasterUserController {
     @PreAuthorize("hasAuthority('ADMIN_ROLES')")
     public ResponseEntity<Object> updateUser(@RequestBody MasterUserRequest user) {
     	
+    	String currentUser = authenticationService.getCurrentUsername();
+        String currentDateTime = dateTimeProvider.getCurrentDateTime();
+        
     	// Check if fields that should not be modified are present in the request
         if (user.getStartDate() != null || user.getCreatedBy() != null || user.getCreatedOn() != null) {
             String message = "Fields such as id, startDate, createdBy, and createdOn cannot be modified.";
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", message));
         }
         try {
-            // Fetch the existing user from the database using the ID from the request body
             MasterUserVo existingUser = masterUserService.getUserById(user.getId());
+            
 
+            // Fetch the existing user from the database using the ID from the request body
             if (existingUser == null) {
                 // Handle the case where the user with the given ID doesn't exist
                 String message = "User with ID " + user.getId() + " not found.";
@@ -131,12 +143,17 @@ public class MasterUserController {
             if (user.getLocation() != null) {
                 existingUser.setLocation(user.getLocation());
             }
-            if (user.getUpdatedBy() != null) {
-                existingUser.setUpdatedBy(user.getUpdatedBy());
-            }
-            if (user.getUpdatedOn() != null) {
-            	existingUser.setUpdatedOn(user.getUpdatedOn());
-            }
+//            if (user.getUpdatedBy() != null) {
+//                existingUser.setUpdatedBy(user.getUpdatedBy());
+//            }
+//            if (user.getUpdatedOn() != null) {
+//            	existingUser.setUpdatedOn(user.getUpdatedOn());
+//            }
+                     
+              existingUser.setUpdatedBy(currentUser);
+              existingUser.setUpdatedOn(currentDateTime);
+              
+            
             if (user.getProjectId() != null) {
                 MasterProjectVo project = new MasterProjectVo();
                 project.setId(user.getProjectId());
