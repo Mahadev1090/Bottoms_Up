@@ -11,12 +11,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ins.web.security.date.AuthenticationService;
+import com.ins.web.security.date.DateTimeProvider;
 import com.ins.web.service.MasterProjectService;
+import com.ins.web.vo.MasterProjectListResponse;
 import com.ins.web.vo.MasterProjectRequest;
 import com.ins.web.vo.MasterProjectVo;
 
@@ -29,93 +31,88 @@ public class MasterProjectController {
 	@Autowired
 	private MasterProjectService masterProjectService;
 
+	@Autowired
+	private AuthenticationService authenticationService;
+
+	@Autowired
+	private DateTimeProvider dateTimeProvider;
+
 	@GetMapping("/getAllProjects")
-    @PreAuthorize("hasAuthority('USER_ROLES')")
-	public List<MasterProjectVo> getAllMasterProjects() {
-		return masterProjectService.getAllMasterProjects();
+	@PreAuthorize("hasAuthority('USER_ROLES')")
+	public MasterProjectListResponse getAllMasterProjects() {
+		List<MasterProjectVo> projectList = masterProjectService.getAllMasterProjects();
+		int projectCount = projectList.size();
+		MasterProjectListResponse response = new MasterProjectListResponse();
+		response.setCount(projectCount);
+		response.setProjects(projectList);
+		return response;
 	}
 
-	@PostMapping("/addProject")
-    @PreAuthorize("hasAuthority('ADMIN_ROLES')")
-	public ResponseEntity<Object> createProject(@RequestBody @Valid MasterProjectRequest masterProjectRequest,
+	@PostMapping("/save")
+	@PreAuthorize("hasAuthority('ADMIN_ROLES')")
+	public ResponseEntity<Object> saveProject(@RequestBody @Valid MasterProjectRequest project,
 			BindingResult bindingResult) {
 
 		if (bindingResult.hasErrors()) {
-			// Build a custom error message or response
 			String errorMessage = "Invalid Input Data. Please check the provided fields.";
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("error", errorMessage));
 		}
 
-		try {
-			ResponseEntity<Map<String, String>> savedProject = masterProjectService.createProject(masterProjectRequest);
-			return new ResponseEntity<>(savedProject, HttpStatus.CREATED);
-		} catch (Exception e) {
-			// Handle other exceptions, log the error, and return an appropriate response
-			String errorMessage = "An unexpected error occurred.";
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Collections.singletonMap("error", errorMessage));
-		}
-	}
-
-	@PutMapping("/update")
-    @PreAuthorize("hasAuthority('ADMIN_ROLES')")
-	public ResponseEntity<Object> updateProject(@RequestBody MasterProjectVo project) {
-
-		if (project.getStartDate() != null || project.getCreatedBy() != null || project.getCreatedOn() != null || project.getProjectKey() != null) {
-			String message = "Fields such as id, startDate, createdBy, and createdOn cannot be modified.";
+		if (project.getStartDate() != null || project.getCreatedBy() != null || project.getCreatedOn() != null
+				|| project.getProjectKey() != null) {
+			String message = "Fields such as id, startDate, project key, createdBy, and createdOn cannot be modified.";
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", message));
 		}
-		
+
 		try {
-			// Fetch the existing project from the database using the ID from the request
-			// body
-			MasterProjectVo existingUser = masterProjectService.getUserById(project.getId());
+			if (project.getId() == null) {
+				// Create a new project
+				ResponseEntity<Map<String, String>> savedProject = masterProjectService.createProject(project);
+				return new ResponseEntity<>(savedProject, HttpStatus.CREATED);
+			} else {
+				// Update an existing project
+				String currentUser = authenticationService.getCurrentUsername();
+				String currentDateTime = dateTimeProvider.getCurrentDateTime();
 
-			if (existingUser == null) {
-				// Handle the case where the project with the given ID doesn't exist
-				String message = "Project with ID " + project.getId() + " not found.";
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", message));
-			}
+				MasterProjectVo existingProject = masterProjectService.getProjectById(project.getId());
 
-			if (project.getStatus() != null) {
-				existingUser.setStatus(project.getStatus());
-			}
-			if (project.getProjectName() != null) {
-				existingUser.setProjectName(project.getProjectName());
-			}
-			if (project.getAccountType() != null) {
-				existingUser.setAccountType(project.getAccountType());
-			}
-			if (project.getProjectAFENum() != null) {
-				existingUser.setProjectAFENum(project.getProjectAFENum());
-			}
-			if (project.getProjectManager() != null) {
-				existingUser.setProjectManager(project.getProjectManager());
-			}
-			if (project.getProjectDescription() != null) {
-				existingUser.setProjectDescription(project.getProjectDescription());
-			}
-			if (project.getProjectApprovedCapex() != null) {
-				existingUser.setProjectApprovedCapex(project.getProjectApprovedCapex());
-			}
-			if (project.getEndDate() != null) {
-				existingUser.setEndDate(project.getEndDate());
-			}
-			if (project.getProjectApprovedOpex() != null) {
-				existingUser.setProjectApprovedOpex(project.getProjectApprovedOpex());
-			}
-			if (project.getUpdatedBy() != null) {
-				existingUser.setUpdatedBy(project.getUpdatedBy());
-			}
-			if (project.getUpdatedOn() != null) {
-				existingUser.setUpdatedOn(project.getUpdatedOn());
-			}
+				if (project.getStatus() != null) {
+					existingProject.setStatus(project.getStatus());
+				}
+				if (project.getProjectName() != null) {
+					existingProject.setProjectName(project.getProjectName());
+				}
+				if (project.getAccountType() != null) {
+					existingProject.setAccountType(project.getAccountType());
+				}
+				if (project.getProjectAFENum() != null) {
+					existingProject.setProjectAFENum(project.getProjectAFENum());
+				}
+				if (project.getProjectManager() != null) {
+					existingProject.setProjectManager(project.getProjectManager());
+				}
+				if (project.getProjectDescription() != null) {
+					existingProject.setProjectDescription(project.getProjectDescription());
+				}
+				if (project.getProjectApprovedCapex() != null) {
+					existingProject.setProjectApprovedCapex(project.getProjectApprovedCapex());
+				}
+				if (project.getEndDate() != null) {
+					existingProject.setEndDate(project.getEndDate());
+				}
+				if (project.getProjectApprovedOpex() != null) {
+					existingProject.setProjectApprovedOpex(project.getProjectApprovedOpex());
+				}
+				// Set updated by and updated on
+				existingProject.setUpdatedBy(currentUser);
+				existingProject.setUpdatedOn(currentDateTime);
 
-			masterProjectService.updateProject(existingUser);
+				// Perform the update
+				masterProjectService.updateProject(existingProject);
 
-			return ResponseEntity.ok(existingUser);
+				return ResponseEntity.ok(existingProject);
+			}
 		} catch (Exception e) {
-			// Handle exceptions and return an appropriate response
 			String message = "An unexpected error occurred.";
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Collections.singletonMap("message", message));

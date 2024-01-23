@@ -16,7 +16,7 @@ public interface MasterProjectService {
 
 	List<MasterProjectVo> getAllMasterProjects();
 	
-	public MasterProjectVo getUserById(long projectId);
+	public MasterProjectVo getProjectById(long projectId);
 	
 	public void updateProject(MasterProjectVo user);
 
