@@ -116,7 +116,7 @@ public class MasterProjectServiceImpl implements MasterProjectService {
 	}
 	
 
-	public MasterProjectVo getUserById(long projectId) {
+	public MasterProjectVo getProjectById(long projectId) {
         return masterProjectDao.findById(projectId).orElse(null);
     }
 	

@@ -1,6 +1,8 @@
 package com.ins.web.vo;
 
 public class MasterProjectRequest {
+	private Long id;
+	
 	private String status;
 
 	private Long projectKey;
@@ -149,6 +151,10 @@ public class MasterProjectRequest {
 
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
+	}
+
+	public Long getId() {
+		return id;
 	}
 	
 }

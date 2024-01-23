@@ -16,6 +16,7 @@ import com.ins.web.dao.MasterProjectDao;
 import com.ins.web.dao.MasterUserDao;
 import com.ins.web.dto.MasterProjectDTO;
 import com.ins.web.dto.MasterUserWithMasterProjectDTO;
+import com.ins.web.dto.SearchResultDTO;
 import com.ins.web.security.date.AuthenticationService;
 import com.ins.web.security.date.DateTimeProvider;
 //import com.ins.web.dao.MasterUserDao;
@@ -56,7 +57,7 @@ public class MasterUserServiceImpl implements MasterUserService {
 
 	// Master User Search with project details
 	@Override
-	public List<MasterUserWithMasterProjectDTO> searchData(SearchRequest searchRequest) {
+	public SearchResultDTO searchData(SearchRequest searchRequest) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<MasterUserVo> criteriaQuery = criteriaBuilder.createQuery(MasterUserVo.class);
 		Root<MasterUserVo> root = criteriaQuery.from(MasterUserVo.class);
@@ -193,7 +194,8 @@ public class MasterUserServiceImpl implements MasterUserService {
 			return masterUserDTO;
 		}).collect(Collectors.toList());
 
-		return resultDTO;
+		SearchResultDTO searchResultDTO = new SearchResultDTO(resultDTO.size(), resultDTO);
+        return searchResultDTO;
 	}
 
 	// Add Master User
@@ -234,14 +236,16 @@ public class MasterUserServiceImpl implements MasterUserService {
 
 			// Saving the user to the database
             masterUserDao.save(newUser);
+        	System.out.println("saved the user");
 
             // Return success response
             return new ResponseEntity<>(Collections.singletonMap("message", "User created successfully"), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             // Handle specific validation errors
-            String errorMessage = "Validation error: " + e.getMessage();
+            String errorMessage = e.getMessage();
             return new ResponseEntity<>(Collections.singletonMap("error", errorMessage), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
+        	System.out.println("in catch");
             // Handle other unexpected errors
             String errorMessage = "An unexpected error occurred: " + e.getMessage();
             return new ResponseEntity<>(Collections.singletonMap("error", errorMessage), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -285,4 +289,5 @@ public class MasterUserServiceImpl implements MasterUserService {
     public void updateUser(MasterUserVo user) {
     	masterUserDao.save(user);
     }
+    
 }

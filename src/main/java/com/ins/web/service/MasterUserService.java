@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 
-import com.ins.web.dto.MasterUserWithMasterProjectDTO;
+import com.ins.web.dto.SearchResultDTO;
 import com.ins.web.vo.MasterUserRequest;
 import com.ins.web.vo.MasterUserVo;
 import com.ins.web.vo.SearchRequest;
@@ -17,8 +17,6 @@ public interface MasterUserService {
 
 //	MasterUserVo newUser(MasterUserVo user) throws Exception;
 	
-	List<MasterUserWithMasterProjectDTO> searchData(SearchRequest searchRequest);
-
 //	MasterUserVo createUser(MasterUserVo user);
 	ResponseEntity<Map<String, String>> createUser(@Valid MasterUserRequest masterUserRequest);
 
@@ -27,4 +25,7 @@ public interface MasterUserService {
 	public MasterUserVo getUserById(long userId);
 	
 	public void updateUser(MasterUserVo user);
+	
+    SearchResultDTO searchData(SearchRequest searchRequest);
+
 }
