@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +43,8 @@ import jakarta.transaction.Transactional;
 @Service
 public class MasterUserServiceImpl implements MasterUserService {
 
+	private static final Logger logger = LogManager.getLogger(MasterUserServiceImpl.class);
+
 	@Autowired
 	private MasterUserDao masterUserDao;
 
@@ -58,6 +63,8 @@ public class MasterUserServiceImpl implements MasterUserService {
 	// Master User Search with project details
 	@Override
 	public SearchResultDTO searchData(SearchRequest searchRequest) {
+		logger.log(Level.INFO, "From service Impl class -> START -> (MasterUserServiceImpl)-> (searchData)");
+
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<MasterUserVo> criteriaQuery = criteriaBuilder.createQuery(MasterUserVo.class);
 		Root<MasterUserVo> root = criteriaQuery.from(MasterUserVo.class);
@@ -195,6 +202,8 @@ public class MasterUserServiceImpl implements MasterUserService {
 		}).collect(Collectors.toList());
 
 		SearchResultDTO searchResultDTO = new SearchResultDTO(resultDTO.size(), resultDTO);
+		logger.log(Level.INFO, "From service Impl class -> END -> (MasterUserServiceImpl)-> (searchData)");
+
         return searchResultDTO;
 	}
 
@@ -202,6 +211,7 @@ public class MasterUserServiceImpl implements MasterUserService {
 	@Override
 	@Transactional
 	public ResponseEntity<Map<String, String>> createUser(MasterUserRequest masterUserRequest){
+		logger.log(Level.INFO, "From service Impl class -> START -> (MasterUserServiceImpl)-> (createUser)");
 
 		String currentUser = authenticationService.getCurrentUsername();
         String currentDateTime = dateTimeProvider.getCurrentDateTime();
@@ -236,23 +246,24 @@ public class MasterUserServiceImpl implements MasterUserService {
 
 			// Saving the user to the database
             masterUserDao.save(newUser);
-        	System.out.println("saved the user");
 
             // Return success response
+    		logger.log(Level.ERROR, "From service Impl class -> END -> (MasterUserServiceImpl)-> (createUser)");
             return new ResponseEntity<>(Collections.singletonMap("message", "User created successfully"), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             // Handle specific validation errors
             String errorMessage = e.getMessage();
             return new ResponseEntity<>(Collections.singletonMap("error", errorMessage), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-        	System.out.println("in catch");
             // Handle other unexpected errors
+    		logger.log(Level.ERROR, "From service Impl class -> An unexpected error occurred. -> (MasterUserServiceImpl)-> (createUser)");
             String errorMessage = "An unexpected error occurred: " + e.getMessage();
             return new ResponseEntity<>(Collections.singletonMap("error", errorMessage), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 	}
 
 	private void validateMasterUserRequest(MasterUserRequest masterUserRequest) throws IllegalArgumentException {
+		logger.log(Level.INFO, "From service Impl class -> START -> (MasterUserServiceImpl)-> (validateMasterUserRequest)");
 		if (masterUserRequest == null) {
 			throw new IllegalArgumentException("MasterUserRequest cannot be null");
 		}
@@ -272,22 +283,24 @@ public class MasterUserServiceImpl implements MasterUserService {
         if (masterUserRequest.getProjectId() == null) {
             throw new IllegalArgumentException("Project ID cannot be null");
         }
+		logger.log(Level.INFO, "From service Impl class -> END -> (MasterUserServiceImpl)-> (validateMasterUserRequest)");
 	}
 
 	
 	// Update MasterUser
 	@Override
 	public List<MasterUserVo> getAllMasterUsers() {
+		logger.log(Level.INFO, "From service Impl class -> START-END -> (MasterUserServiceImpl)-> (getAllMasterUsers)");
 		return masterUserDao.findAll();
 	}
 	
-	
 	public MasterUserVo getUserById(long userId) {
+		logger.log(Level.INFO, "From service Impl class -> START-END -> (MasterUserServiceImpl)-> (getUserById)");
         return masterUserDao.findById(userId).orElse(null);
     }
 
     public void updateUser(MasterUserVo user) {
+		logger.log(Level.INFO, "From service Impl class -> START-END -> (MasterUserServiceImpl)-> (updateUser)");
     	masterUserDao.save(user);
     }
-    
 }

@@ -4,6 +4,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,8 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/masterProjects")
 public class MasterProjectController {
 
+	private static final Logger logger = LogManager.getLogger(MasterProjectController.class);
+
 	@Autowired
 	private MasterProjectService masterProjectService;
 
@@ -40,11 +45,13 @@ public class MasterProjectController {
 	@GetMapping("/getAllProjects")
 	@PreAuthorize("hasAuthority('USER_ROLES')")
 	public MasterProjectListResponse getAllMasterProjects() {
+		logger.log(Level.INFO, "From controller class -> START -> (MasterProjectController) -> (getAllMasterProjects)");
 		List<MasterProjectVo> projectList = masterProjectService.getAllMasterProjects();
 		int projectCount = projectList.size();
 		MasterProjectListResponse response = new MasterProjectListResponse();
 		response.setCount(projectCount);
 		response.setProjects(projectList);
+		logger.log(Level.INFO, "From controller class -> END -> (MasterProjectController) -> (getAllMasterProjects)");
 		return response;
 	}
 
@@ -53,24 +60,31 @@ public class MasterProjectController {
 	public ResponseEntity<Object> saveProject(@RequestBody @Valid MasterProjectRequest project,
 			BindingResult bindingResult) {
 
+		logger.log(Level.INFO, "From controller class -> START -> (MasterProjectController) -> (saveProject)");
+
 		if (bindingResult.hasErrors()) {
+			logger.log(Level.ERROR, "From controller class -> Invalid Input Data. Please check the provided fields. -> (MasterProjectController) -> (saveProject)");
 			String errorMessage = "Invalid Input Data. Please check the provided fields.";
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("error", errorMessage));
 		}
 
 		if (project.getStartDate() != null || project.getCreatedBy() != null || project.getCreatedOn() != null
 				|| project.getProjectKey() != null) {
+			logger.log(Level.ERROR, "From controller class -> Fields such as id, startDate, project key, createdBy, and createdOn cannot be modified. -> (MasterProjectController) -> (saveProject)");
 			String message = "Fields such as id, startDate, project key, createdBy, and createdOn cannot be modified.";
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", message));
 		}
 
 		try {
 			if (project.getId() == null) {
+				logger.log(Level.INFO, "From controller class -> Saving the new Project created. -> (MasterProjectController) -> (saveProject)");
 				// Create a new project
 				ResponseEntity<Map<String, String>> savedProject = masterProjectService.createProject(project);
+				logger.log(Level.INFO, "From controller class -> END -> (MasterProjectController) -> (saveProject)");
 				return new ResponseEntity<>(savedProject, HttpStatus.CREATED);
 			} else {
 				// Update an existing project
+				logger.log(Level.INFO, "From controller class -> Updating the new Existing Project. -> (MasterProjectController) -> (saveProject)");
 				String currentUser = authenticationService.getCurrentUsername();
 				String currentDateTime = dateTimeProvider.getCurrentDateTime();
 
@@ -109,11 +123,12 @@ public class MasterProjectController {
 
 				// Perform the update
 				masterProjectService.updateProject(existingProject);
-
+				logger.log(Level.INFO, "From controller class -> END -> (MasterProjectController) -> (saveProject)");
 				return ResponseEntity.ok(existingProject);
 			}
 		} catch (Exception e) {
 			String message = "An unexpected error occurred.";
+			logger.log(Level.ERROR, "From controller class -> An unexpected error occurred. -> (MasterProjectController) -> (saveProject)");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Collections.singletonMap("message", message));
 		}

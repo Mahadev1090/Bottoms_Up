@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +36,8 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/masterUsers")
 public class MasterUserController {
 
+	private static final Logger logger = LogManager.getLogger(MasterUserController.class);
+
 	@Autowired
 	private MasterUserService masterUserService;
 
@@ -45,41 +50,47 @@ public class MasterUserController {
 	@GetMapping("/getAllUsers")
 	@PreAuthorize("hasAuthority('USER_ROLES')")
 	public MasterUserListResponse getAllMasterUsers() {
+		logger.log(Level.INFO, "From controller class -> START -> (MasterUserController) -> (getAllMasterUsers)");
 		List<MasterUserVo> userList = masterUserService.getAllMasterUsers();
 		int userCount = userList.size();
 
 		MasterUserListResponse response = new MasterUserListResponse();
 		response.setCount(userCount);
 		response.setUsers(userList);
-
+		logger.log(Level.INFO, "From controller class -> END -> (MasterUserController) -> (getAllMasterUsers)");
 		return response;
 	}
 
 	@PostMapping("/search")
 	@PreAuthorize("hasAuthority('ADMIN_ROLES')")
 	public ResponseEntity<Object> searchData(@RequestBody SearchRequest searchRequest) {
+		logger.log(Level.INFO, "From controller class -> Start -> (MasterUserController) -> (searchData)");
 
 		try {
 
 			SearchResultDTO resultDTO = masterUserService.searchData(searchRequest);
-
+			logger.log(Level.INFO, "From controller class -> got the resultDTO value -> (MasterUserController) -> (searchData)");
 			if (resultDTO.getResult().isEmpty()) {
 				String message = "No matching data found for the provided criteria.";
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", message));
 			}
 
 			// Include count in the response
+			logger.log(Level.INFO, "From controller class -> adding the count to response -> (MasterUserController) -> (searchData)");
 			Map<String, Object> response = new HashMap<>();
 			response.put("count", resultDTO.getCount());
 			response.put("result", resultDTO.getResult());
+			logger.log(Level.INFO, "From controller class -> END -> (MasterUserController) -> (searchData)");
 
 			return ResponseEntity.ok(response);
 
 		} catch (NoMatchingDataException e) {
+			logger.log(Level.ERROR, "From controller class -> No matching data found for the provided criteria. -> (MasterUserController) -> (searchData)");
+
 			String message = "No matching data found for the provided criteria.";
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", message));
 		} catch (Exception e) {
-
+			logger.log(Level.ERROR, "From controller class -> An unexpected error occurred. -> (MasterUserController) -> (searchData)");
 			String message = "An unexpected error occurred." + e;
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Collections.singletonMap("message", message));
@@ -89,8 +100,10 @@ public class MasterUserController {
 	@PostMapping("/save")
 	@PreAuthorize("hasAuthority('ADMIN_ROLES')")
 	public ResponseEntity<Object> saveUser(@RequestBody @Valid MasterUserRequest user, BindingResult bindingResult) {
-		System.out.println("entering the saveUser");
+		logger.log(Level.INFO, "From controller class -> START -> (MasterUserController) -> (saveUser)");
+		
 		if (bindingResult.hasErrors()) {
+			logger.log(Level.ERROR, "From controller class -> Invalid Input Data. Please check the provided fields. -> (MasterUserController) -> (saveUser)");
 			String errorMessage = "Invalid Input Data. Please check the provided fields.";
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("error", errorMessage));
 		}
@@ -102,19 +115,23 @@ public class MasterUserController {
 			}
 			if (existingUser == null) {
 				// If the user doesn't exist, it's a new user, so create it
+				logger.log(Level.INFO, "From controller class -> Saving the new user created. -> (MasterUserController) -> (saveUser)");
 				ResponseEntity<Map<String, String>> savedUser = masterUserService.createUser(user);
+				logger.log(Level.INFO, "From controller class -> END -> (MasterUserController) -> (saveUser)");
 				return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
 			} else {
 				// If the user exists, it's an update
 				String currentUser = authenticationService.getCurrentUsername();
 				String currentDateTime = dateTimeProvider.getCurrentDateTime();
-
+				
 				// Check if fields that should not be modified are present in the request
 				if (user.getStartDate() != null || user.getCreatedBy() != null || user.getCreatedOn() != null) {
+					logger.log(Level.INFO, "From controller class -> Fields such as id, startDate, createdBy, and createdOn cannot be modified. -> (MasterUserController) -> (saveUser)");
 					String message = "Fields such as id, startDate, createdBy, and createdOn cannot be modified.";
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 							.body(Collections.singletonMap("message", message));
 				}
+				logger.log(Level.INFO, "From controller class -> Updating the existing user. -> (MasterUserController) -> (saveUser)");
 
 				// Updating the existing user
 				if (user.getName() != null) {
@@ -156,11 +173,12 @@ public class MasterUserController {
 				}
 
 				masterUserService.updateUser(existingUser);
-
+				logger.log(Level.INFO, "From controller class -> END -> (MasterUserController) -> (saveUser)");
 				return ResponseEntity.ok(existingUser);
 			}
 		} catch (Exception e) {
 			String message = "An unexpected error occurred.";
+			logger.log(Level.ERROR, "From controller class -> An unexpected error occurred. -> (MasterUserController) -> (saveUser)");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Collections.singletonMap("message", message));
 		}

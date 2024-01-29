@@ -2,10 +2,15 @@ package com.ins.web.security.filter;
 
 import com.ins.web.security.service.JwtService;
 import com.ins.web.security.service.UserInfoService;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,12 +23,16 @@ import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
+	
+	private static final Logger logger = LogManager.getLogger(JwtFilter.class);
+
     @Autowired
     private JwtService jwtService;
     @Autowired
     private UserInfoService userInfoService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+		logger.log(Level.INFO, "From JwtFilter class -> START -> (JwtFilter)-> (doFilterInternal)");
         String authHeader = request.getHeader("Authorization");
         String token= null;
         String userName = null;
@@ -40,5 +49,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request,response);
+		logger.log(Level.INFO, "From JwtFilter class -> END -> (JwtFilter)-> (doFilterInternal)");
+
     }
 }
