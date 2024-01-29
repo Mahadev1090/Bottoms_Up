@@ -1,5 +1,8 @@
 package com.ins.web.security.config;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -14,6 +17,8 @@ import com.ins.web.vo.MasterUserVo;
 @Component
 public class UpdateInfoAspect {
 
+	private static final Logger logger = LogManager.getLogger(UpdateInfoAspect.class);
+
     @Autowired
     private AuthenticationService authenticationService; 
 
@@ -22,6 +27,8 @@ public class UpdateInfoAspect {
 
     @Before("execution(* com.ins.web.controller.MasterUserController.*(..))") // Adjust the package and method name
     public void beforeUpdate(JoinPoint joinPoint) {
+		logger.log(Level.INFO, "From UpdateInfoAspect class -> START -> (UpdateInfoAspect)-> (beforeUpdate)");
+
         // Get the current user and update the fields
         String currentUser = authenticationService.getCurrentUsername();
         String currentDateTime = dateTimeProvider.getCurrentDateTime(); 
@@ -34,5 +41,6 @@ public class UpdateInfoAspect {
                 masterUser.setUpdatedOn(currentDateTime);
             }
         }
+		logger.log(Level.INFO, "From UpdateInfoAspect class -> END -> (UpdateInfoAspect)-> (beforeUpdate)");
     }
 }
